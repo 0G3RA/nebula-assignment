@@ -6,6 +6,10 @@ export const QUEUE_TOKENS = {
   PUSH: Symbol('PUSH_QUEUE'),
 } as const;
 
+export const WORKER_TOKENS = {
+  PUSH: Symbol('PUSH_WORKER'),
+} as const;
+
 export const JOBS = {
   SEND_PUSH: 'send-push',
 } as const;

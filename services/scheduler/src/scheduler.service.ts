@@ -50,7 +50,8 @@ export class SchedulerService implements OnModuleInit {
   }
 
   private async onUserCreated({ data }: Message<UserCreatedV1>) {
-    const scheduledAt = new Date(Date.now() + this.delayMs).toISOString();
+    // const scheduledAt = new Date(Date.now() + this.delayMs).toISOString();
+    const scheduledAt = new Date(Date.now() + 300).toISOString(); // TODO: remove this one too
 
     await this.pushQueue.add(
       JOBS.SEND_PUSH,
@@ -62,7 +63,8 @@ export class SchedulerService implements OnModuleInit {
         correlationId: data.correlationId,
       },
       {
-        delay: this.delayMs,
+        // delay: this.delayMs,
+        delay: 300, // TODO: remove this one too
         jobId: data.correlationId,
       },
     );
