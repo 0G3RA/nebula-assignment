@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import amqp, { Channel, ChannelModel, ConfirmChannel, Options } from 'amqplib';
+import amqp, { Channel, ChannelModel, ConfirmChannel, Options, Replies } from 'amqplib';
 import { cfg } from '@app/config';
 import type { SubscribeOptions } from '../interfaces/subscribe.interface';
 import type { Message } from '../interfaces/message.type';
@@ -12,6 +12,7 @@ export class RmqService implements OnModuleInit, OnModuleDestroy {
   private pub!: ConfirmChannel;
   private readonly config = cfg.rmq();
   private ready!: Promise<void>;
+
   async onModuleInit(): Promise<void> {
     this.ready = this.connect();
     await this.ready;
@@ -60,15 +61,12 @@ export class RmqService implements OnModuleInit, OnModuleDestroy {
   async subscribe(
     opts: SubscribeOptions,
     handler: (m: Message) => Promise<void> | void
-  ): Promise<void> {
+  ): Promise<() => Promise<void>> {
     await this.ready;
 
     const ch: Channel = await this.conn.createChannel();
     await ch.assertExchange(this.config.exchange, 'topic', { durable: true });
-
-    await ch.assertQueue(opts.queue, {
-      durable: true,
-    });
+    await ch.assertQueue(opts.queue, { durable: true });
 
     for (const key of opts.bindingKeys) {
       await ch.bindQueue(opts.queue, this.config.exchange, key);
@@ -81,7 +79,7 @@ export class RmqService implements OnModuleInit, OnModuleDestroy {
       `Consuming queue="${opts.queue}" keys=[${opts.bindingKeys.join(', ')}] prefetch=${prefetch}`
     );
 
-    await ch.consume(
+    const res: Replies.Consume = await ch.consume(
       opts.queue,
       (msg) => {
         if (!msg) return;
@@ -102,5 +100,21 @@ export class RmqService implements OnModuleInit, OnModuleDestroy {
       },
       { noAck: false }
     );
+
+    const consumerTag = res.consumerTag;
+
+    return async () => {
+      try {
+        if (consumerTag) {
+          await ch.cancel(consumerTag);
+        }
+      } finally {
+        try {
+          await ch.close();
+        } catch (error) {
+          this.logger.warn('Error closing channel', error as any);
+        }
+      }
+    };
   }
 }

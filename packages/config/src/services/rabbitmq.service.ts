@@ -1,7 +1,6 @@
 import { ensureShared } from '../validators/shared.validator';
 
 export const rabbitmqConfig = {
-  /** Setup RMQ */
   getConfig() {
     const e = ensureShared();
     return {
