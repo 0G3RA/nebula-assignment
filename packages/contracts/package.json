@@ -1,0 +1,13 @@
+{
+  "name": "@app/config",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { 
+    "build": "tsc -p tsconfig.json" 
+  },
+  "author": "Herasymenko Oleh",
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.0"
+}
