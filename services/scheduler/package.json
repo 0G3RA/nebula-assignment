@@ -9,6 +9,9 @@
     "build": "nest build"
   },
   "dependencies": {
+    "@app/config": "workspace:*",
+    "@app/contracts": "workspace:*",
+    "@app/rmq": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",

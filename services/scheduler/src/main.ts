@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   // Only DI-context for queues and events
-  await NestFactory.create(AppModule);
+  await NestFactory.createApplicationContext(AppModule);
 
   console.log('-- Scheduler worker started --');
 }

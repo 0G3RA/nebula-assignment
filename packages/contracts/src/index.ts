@@ -1,1 +1,1 @@
-console.log('Contracts placeholder');
+export * from './events';
