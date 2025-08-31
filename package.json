@@ -1,0 +1,19 @@
+{
+  "name": "nebula-assignment",
+  "description": "Test assignment project by Herasymenko Oleh.",
+  "author": "Herasymenko Oleh",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.0",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
