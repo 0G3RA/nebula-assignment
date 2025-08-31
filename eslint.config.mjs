@@ -1,4 +1,3 @@
-// eslint.config.mjs (root)
 import js from "@eslint/js";
 import ts from "typescript-eslint";
 
@@ -8,10 +7,9 @@ const ignores = [
   "**/node_modules/**",
   "**/coverage/**",
   "**/build/**",
-  "eslint.config.*", // не лінтити сам конфіг
+  "eslint.config.*",
 ];
 
-// Базові конфіги, scoped на services/**
 const scopedBase = [js.configs.recommended, ...ts.configs.recommendedTypeChecked].map(
   (cfg) => ({ ...cfg, files, ignores })
 );
@@ -36,11 +34,9 @@ export default [
       },
     },
     rules: {
-      // Стилі довіряємо Prettier → ESLint їх не чіпає
       quotes: "off",
       semi: ["error", "always"],
 
-      // Корисні TS-правила
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
@@ -50,8 +46,6 @@ export default [
       "@typescript-eslint/no-unsafe-argument": "warn",
     },
   },
-
-  // Послаблення в тестах (e2e/spec), щоб не ловити no-unsafe-* на expect-ланцюжках тощо
   {
     files: ["services/**/test/**/*.{ts,tsx,js,jsx}", "services/**/*/*.spec.{ts,tsx,js,jsx}"],
     rules: {
