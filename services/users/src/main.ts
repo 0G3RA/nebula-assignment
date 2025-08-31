@@ -12,6 +12,7 @@ async function bootstrap() {
 
   await app.listen(API_CONFIG.PORT);
   console.log('-- Users service listening on http://localhost:3001/api --');
+  console.log('-- Users service listening on http://localhost:3001/api --');
 }
 
 void bootstrap().catch((error) => {

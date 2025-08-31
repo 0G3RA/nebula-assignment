@@ -7,15 +7,33 @@
   "scripts": {
     "dev:users": "pnpm --filter @app/users dev",
     "dev:scheduler": "pnpm --filter @app/scheduler dev",
-    "dev:notifications": "pnpm --filter @app/notifications dev"
+    "dev:notifications": "pnpm --filter @app/notifications dev",
+    "dev:all": "pnpm -r --filter @app/users --filter @app/scheduler --filter @app/notifications dev",
+    "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write services",
+    "format:check": "prettier --check services"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.15.0",
   "devDependencies": {
+    "@eslint/js": "^9.34.0",
     "@types/node": "^24.3.0",
     "eslint": "^9.34.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
+  },
+  "lint-staged": {
+    "services/**/*.{ts,tsx,js,jsx,json,md}": [
+      "prettier --write"
+    ],
+    "services/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ]
   }
 }
