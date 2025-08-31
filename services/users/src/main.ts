@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { cfg } from '@app/config';
 import { DatabaseService as DbService } from './modules/database';
+import { AppValidationPipe } from 'src/common/pipes';
 
 const API_CONFIG = {
   PORT: 3001,
@@ -13,6 +14,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix(API_CONFIG.PREFIX);
+  app.useGlobalPipes(new AppValidationPipe());
 
   const db = app.get(DbService);
   DbService.enableShutdownHooks(app, db);
