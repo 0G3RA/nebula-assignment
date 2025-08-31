@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build": "pnpm -r build",
     "dev:users": "pnpm --filter @app/users dev",
     "dev:scheduler": "pnpm --filter @app/scheduler dev",
     "dev:notifications": "pnpm --filter @app/notifications dev",

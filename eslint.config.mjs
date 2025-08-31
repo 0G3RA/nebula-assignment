@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import ts from "typescript-eslint";
 
-const files = ["services/**/*.{ts,tsx,js,jsx}"];
+const files = ["services/**/*.{ts,tsx,js,jsx}", "packages/**/*.{ts,tsx,js,jsx}"];
 const ignores = [
   "**/dist/**",
   "**/node_modules/**",

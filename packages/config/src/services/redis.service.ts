@@ -1,0 +1,14 @@
+import { ensureShared } from '../validators/shared.validator';
+
+export const redisConfig = {
+  getConnection() {
+    const e = ensureShared();
+    return {
+      host: e.REDIS_HOST,
+      port: e.REDIS_PORT,
+      db: e.REDIS_DB,
+      // disabling maxRetriesPerRequest
+      maxRetriesPerRequest: null as unknown as number,
+    };
+  },
+};

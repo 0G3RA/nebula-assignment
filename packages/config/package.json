@@ -9,5 +9,11 @@
   },
   "author": "Herasymenko Oleh",
   "license": "ISC",
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@10.15.0",
+  "dependencies": {
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/config": "^4.0.2",
+    "dotenv": "^17.2.1",
+    "zod": "^4.1.5"
+  }
 }
