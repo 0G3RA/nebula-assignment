@@ -22,7 +22,7 @@
 - **Слабка зв’язаність** між сервісами (event-driven).
 - **Надійне планування відкладених задач** (delay, retry, rate-limit).
 - **Простий developer experience** (швидкий запуск локально).
-- **Прозорість**: метрики, логування, трасування.
+- **Прозорість**: метрики, логування, трасування. (*UPD: Overthinking*)
 - **Best practices**: конфіги через env, ідемпотентність, спільні пакети.
 
 ---
@@ -89,16 +89,18 @@
 - Rate-limit: 20 jobs/с.
 - Retry/backoff: exponential.
 
-### 6. Observability
+### 6. Observability (*UPD: Overthinking*)
 - Prometheus `/metrics` у всіх сервісах.
 - Метрики: `push_sent_total`, `push_failed_total`, `push_latency_seconds`.
 - TraceId через RMQ → BullMQ → HTTP.
 - Логи зі структурою.
 
-### 7. Конфіги `.env`
+### 7. Конфіги `.env` (*Overthinking — deprecated*)
 - **Кореневий `.env`**: спільні параметри (Redis, RMQ, webhook).
 - **Svc local `.env`**: лише `DATABASE_URL` для Prisma.
 - `@app/config` читає обидва, підтримує префікси (`USERS_DB_*`, `NOTIFS_DB_*`).
+
+> UPD: Зробив єдинний файл .env
 
 ### 8. Спільні пакети
 - **@app/config** — валідація конфігів (Zod).
