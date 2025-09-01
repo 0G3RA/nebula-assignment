@@ -57,10 +57,10 @@ services:
       --save ""
       --appendonly no
       --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
-      --requirepass ${REDIS_PASSWORD:-}
+      --maxmemory-policy noeviction
+      --requirepass ${REDIS_PASSWORD:-default_password}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-default_password}", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3

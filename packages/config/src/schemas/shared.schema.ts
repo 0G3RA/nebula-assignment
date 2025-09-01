@@ -8,6 +8,7 @@ export const sharedSchema = z.object({
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
   REDIS_DB: z.coerce.number().default(0),
+  REDIS_PASSWORD: z.coerce.string(),
 
   // RabbitMQ
   RMQ_URL: z.string().regex(/^(amqp|amqps):\/\//, 'Must be amqp URL'),

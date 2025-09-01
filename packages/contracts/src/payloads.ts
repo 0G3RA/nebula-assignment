@@ -8,7 +8,7 @@ export interface UserCreatedV1 {
 
 export type SendPushJob = {
   userId: string;
-  username: string;
+  name: string;
   scheduledAt: string; // ISO
   traceId: string;
   correlationId: string;
