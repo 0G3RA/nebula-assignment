@@ -1,41 +1,70 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { type SendPushJob } from '@app/contracts';
+import { httpPost } from 'src/common/http.util';
 
 @Injectable()
 export class PushNotificationService {
   private readonly logger = new Logger(PushNotificationService.name);
 
   async processPushNotification(jobData: SendPushJob): Promise<void> {
-    const { userId, username, scheduledAt, traceId, correlationId } = jobData;
+    const { userId, name, scheduledAt, traceId, correlationId } = jobData;
 
     this.logger.log(`Processing push notification for user ${userId}`, {
-      username,
+      name,
       scheduledAt,
       traceId,
       correlationId,
     });
 
+    // TODO: UPSERT NOTIFICATION
+
     try {
       await this.sendPushNotification(jobData);
+      // TODO: MARK AS DONE - NOTIFICATION
+
       this.logger.log(`Push notification sent successfully to user ${userId}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to send push notification to user ${userId}`,
-        error,
-      );
+      const errorMessage = error instanceof Error ? error.message : 'unknown';
+      // TODO: MARK AS ERROR - NOTIFICATION
+
+      this.logger.error(`Failed to send push notification to user ${userId}`, {
+        error: errorMessage,
+        traceId,
+        correlationId,
+      });
+
       throw error;
     }
   }
 
   private async sendPushNotification(data: SendPushJob): Promise<void> {
-    // TODO: add mock service with hook
-    // TODO2: add notification model for saving data
+    const { userId, name, scheduledAt, traceId, correlationId } = data;
 
-    //! Temp solution
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!process.env.WEBHOOK_URL) {
+      throw new Error('WEBHOOK_URL environment variable is not configured');
+    }
 
-    this.logger.debug(
-      `Push notification sent to user ${data.userId} (${data.username})`,
-    );
+    const payload = {
+      type: 'push' as const,
+      userId,
+      name,
+      scheduledAt,
+      sentAt: new Date().toISOString(),
+      traceId,
+      correlationId,
+    };
+
+    const headers = {
+      'X-Trace-Id': traceId,
+      'X-Correlation-Id': correlationId,
+      'Content-Type': 'application/json',
+    };
+
+    await httpPost(process.env.WEBHOOK_URL, payload, { headers });
+
+    this.logger.debug(`Push notification sent to user ${userId} (${name})`, {
+      traceId,
+      correlationId,
+    });
   }
 }

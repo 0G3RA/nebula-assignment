@@ -14,8 +14,9 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
-    "ioredis": "^5.7.0",
+    "axios": "^1.11.0",
     "bullmq": "^5.58.4",
+    "ioredis": "^5.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
