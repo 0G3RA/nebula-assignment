@@ -1,10 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { type SendPushJob } from '@app/contracts';
 import { httpPost } from 'src/common/http.util';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class PushNotificationService {
   private readonly logger = new Logger(PushNotificationService.name);
+
+  constructor(private readonly notificationService: NotificationService) {}
 
   async processPushNotification(jobData: SendPushJob): Promise<void> {
     const { userId, name, scheduledAt, traceId, correlationId } = jobData;
@@ -16,22 +19,31 @@ export class PushNotificationService {
       correlationId,
     });
 
-    // TODO: UPSERT NOTIFICATION
+    await this.notificationService.upsertNotification({
+      userId,
+      correlationId,
+      traceId,
+      scheduledAt,
+    });
 
     try {
       await this.sendPushNotification(jobData);
-      // TODO: MARK AS DONE - NOTIFICATION
 
+      await this.notificationService.markNotificationAsSent(correlationId);
       this.logger.log(`Push notification sent successfully to user ${userId}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'unknown';
-      // TODO: MARK AS ERROR - NOTIFICATION
 
       this.logger.error(`Failed to send push notification to user ${userId}`, {
         error: errorMessage,
         traceId,
         correlationId,
       });
+
+      await this.notificationService.markNotificationAsFailed(
+        correlationId,
+        errorMessage,
+      );
 
       throw error;
     }
