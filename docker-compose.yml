@@ -88,7 +88,7 @@ services:
     restart: unless-stopped
     networks: [nebula-network]
 
-  users:
+  app_users:
     build:
       context: .
       dockerfile: services/users/Dockerfile
