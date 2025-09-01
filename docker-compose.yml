@@ -1,13 +1,12 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: users_postgres
+    env_file: ./.env
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-users_db}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${USERS_DB_NAME}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
@@ -15,22 +14,22 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-users_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${USERS_DB_NAME}"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    networks:
-      - nebula-network
+    networks: [nebula-network]
 
   postgres_notifications:
     image: postgres:16-alpine
     container_name: notifications_postgres
+    env_file: ./.env
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: notifications_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${NOTIFS_DB_NAME}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5433:5432"
@@ -38,18 +37,18 @@ services:
       - pgdata_notifications:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d notifications_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${NOTIFS_DB_NAME}"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    networks:
-      - nebula-network
+    networks: [nebula-network]
 
   redis:
     image: redis:7-alpine
     container_name: nebula_redis
+    env_file: ./.env
     ports:
       - "6379:6379"
     command: >
@@ -58,26 +57,26 @@ services:
       --appendonly no
       --maxmemory 256mb
       --maxmemory-policy noeviction
-      --requirepass ${REDIS_PASSWORD:-default_password}
+      --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-default_password}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
     restart: unless-stopped
-    networks:
-      - nebula-network
+    networks: [nebula-network]
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: nebula_rabbitmq
+    env_file: ./.env
     ports:
-      - "5672:5672"
+      - "5672:5672" 
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - rabbitmq_logs:/var/log/rabbitmq
@@ -87,70 +86,48 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
-    networks:
-      - nebula-network
+    networks: [nebula-network]
 
   users:
-      build:
-        context: .
-        dockerfile: services/users/Dockerfile
-      container_name: app_users
-      environment:
-        # DB (users)
-        USERS_DB_HOST: postgres
-        USERS_DB_PORT: 5432
-        USERS_DB_USER: ${DB_USER:-postgres}
-        USERS_DB_PASSWORD: ${DB_PASSWORD:-postgres}
-        USERS_DB_NAME: ${DB_NAME:-users_db}
-        # RMQ
-        RMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
-        RMQ_EXCHANGE: app.events
-        RMQ_PREFETCH: 20
-        # Redis
-        REDIS_HOST: redis
-        REDIS_PORT: 6379
-        REDIS_DB: 0
-        REDIS_PASSWORD: ${REDIS_PASSWORD:-default_password}
-        # Notifications
-        WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3000/webhook}
-        PUSH_DELAY_HOURS: 24
-        # Common
-        NODE_ENV: production
-      depends_on:
-        postgres:
-          condition: service_healthy
-        rabbitmq:
-          condition: service_healthy
-      ports:
-        - "3001:3001"
-      restart: unless-stopped
-      networks: [nebula-network]
-      
+    build:
+      context: .
+      dockerfile: services/users/Dockerfile
+    container_name: app_users
+    env_file: ./.env
+    environment:
+      NODE_ENV: production
+      # internal override
+      USERS_DB_HOST: postgres
+      USERS_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      # Prisma CLI
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${USERS_DB_NAME}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    networks: [nebula-network]
+
   app_scheduler:
     build:
       context: .
       dockerfile: services/scheduler/Dockerfile
+    container_name: app_scheduler
+    env_file: ./.env
     environment:
-        # DB (users)
-        USERS_DB_HOST: postgres
-        USERS_DB_PORT: 5432
-        USERS_DB_USER: ${DB_USER:-postgres}
-        USERS_DB_PASSWORD: ${DB_PASSWORD:-postgres}
-        USERS_DB_NAME: ${DB_NAME:-users_db}
-        # RMQ
-        RMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
-        RMQ_EXCHANGE: app.events
-        RMQ_PREFETCH: 20
-        # Redis
-        REDIS_HOST: redis
-        REDIS_PORT: 6379
-        REDIS_DB: 0
-        REDIS_PASSWORD: ${REDIS_PASSWORD:-default_password}
-        # Notifications
-        WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3000/webhook}
-        PUSH_DELAY_HOURS: 24
-        # Common
-        NODE_ENV: production
+      NODE_ENV: production
+      # Internal override
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -164,27 +141,18 @@ services:
       context: .
       dockerfile: services/notifications/Dockerfile
     container_name: app_notifications
+    env_file: ./.env
     environment:
-        # DB (notifications)
-        NOTIFS_DB_HOST: postgres_notifications
-        NOTIFS_DB_PORT: 5432
-        NOTIFS_DB_USER: ${DB_USER:-postgres}
-        NOTIFS_DB_PASSWORD: ${DB_PASSWORD:-postgres}
-        NOTIFS_DB_NAME: notifications_db
-        # RMQ
-        RMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
-        RMQ_EXCHANGE: app.events
-        RMQ_PREFETCH: 20
-        # Redis
-        REDIS_HOST: redis
-        REDIS_PORT: 6379
-        REDIS_DB: 0
-        REDIS_PASSWORD: ${REDIS_PASSWORD:-default_password}
-        # Notifications
-        WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3000/webhook}
-        PUSH_DELAY_HOURS: 24
-        # Common
-        NODE_ENV: production
+      NODE_ENV: production
+      # Internal override
+      NOTIFS_DB_HOST: postgres_notifications
+      NOTIFS_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      # Prisma CLI
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres_notifications:5432/${NOTIFS_DB_NAME}?schema=public
     depends_on:
       postgres_notifications:
         condition: service_healthy
@@ -197,13 +165,9 @@ services:
 
 volumes:
   pgdata:
-    driver: local
   pgdata_notifications:
-    driver: local
   rabbitmq_data:
-    driver: local
   rabbitmq_logs:
-    driver: local
 
 networks:
   nebula-network:

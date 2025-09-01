@@ -11,6 +11,7 @@ const API_CONFIG = {
 
 async function bootstrap() {
   process.env.DATABASE_URL = cfg.dbUrl('USERS');
+  console.log(cfg.dbUrl('USERS'), 123);
 
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix(API_CONFIG.PREFIX);

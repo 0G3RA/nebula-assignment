@@ -9,7 +9,7 @@ pwd
 ls -la
 
 # Construct DATABASE_URL from Docker environment variables
-export DATABASE_URL="postgresql://${USERS_DB_USER}:${USERS_DB_PASSWORD}@${USERS_DB_HOST}:${USERS_DB_PORT}/${USERS_DB_NAME}?schema=public"
+export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${USERS_DB_HOST}:5432/${USERS_DB_NAME}?schema=public"
 
 echo "[users] Using DATABASE_URL: ${DATABASE_URL}"
 

@@ -9,7 +9,7 @@ pwd
 ls -la
 
 # Construct DATABASE_URL from Docker environment variables
-export DATABASE_URL="postgresql://${NOTIFS_DB_USER}:${NOTIFS_DB_PASSWORD}@${NOTIFS_DB_HOST}:${NOTIFS_DB_PORT}/${NOTIFS_DB_NAME}?schema=public"
+export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${NOTIFS_DB_HOST}:5432/${NOTIFS_DB_NAME}?schema=public"
 
 echo "[notifications] Using DATABASE_URL: ${DATABASE_URL}"
 

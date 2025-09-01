@@ -7,10 +7,7 @@ import * as path from 'node:path';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath:
-        process.env.NODE_ENV === 'development'
-          ? [path.resolve(__dirname, '../../../.env'), path.resolve(process.cwd(), '.env')]
-          : undefined,
+      envFilePath: [path.resolve(__dirname, '../../../.env'), path.resolve(process.cwd(), '.env')],
       expandVariables: true,
     }),
   ],
