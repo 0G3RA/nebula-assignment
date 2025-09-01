@@ -19,11 +19,11 @@ COPY --from=deps /app /app
 RUN pnpm -r --filter "./packages/*" build
 
 # Prisma Client
-RUN if [ -f "services/users/prisma/schema.prisma" ]; then \
-      pnpm --filter @app/users prisma generate --schema=services/users/prisma/schema.prisma; \
+RUN if [ -f "services/notifications/prisma/schema.prisma" ]; then \
+      pnpm --filter @app/notifications prisma generate --schema=services/notifications/prisma/schema.prisma; \
     fi
 
-RUN pnpm -r --filter @app/users build
+RUN pnpm -r --filter @app/notifications build
 
 # --- run ---
 FROM node:22-alpine AS runner
@@ -41,8 +41,8 @@ COPY --from=build /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 RUN find /app -name ".env*" -type f -delete
 
 # entrypoint
-COPY services/users/entrypoint.sh ./services/users/entrypoint.sh
-RUN chmod +x ./services/users/entrypoint.sh
+COPY services/notifications/entrypoint.sh ./services/notifications/entrypoint.sh
+RUN chmod +x ./services/notifications/entrypoint.sh
 
-WORKDIR /app/services/users
+WORKDIR /app/services/notifications
 CMD ["./entrypoint.sh"]

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService as DbService } from '../database';
-import { NotificationStatus } from '@prisma/client';
+import { NotificationStatus } from 'node_modules/.prisma/client';
 import { toDate } from 'src/common/date.util';
 import { UpsertNotificationInput } from './notification.interface';
 

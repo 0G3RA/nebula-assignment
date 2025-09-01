@@ -125,7 +125,75 @@ services:
         - "3001:3001"
       restart: unless-stopped
       networks: [nebula-network]
+      
+  app_scheduler:
+    build:
+      context: .
+      dockerfile: services/scheduler/Dockerfile
+    environment:
+        # DB (users)
+        USERS_DB_HOST: postgres
+        USERS_DB_PORT: 5432
+        USERS_DB_USER: ${DB_USER:-postgres}
+        USERS_DB_PASSWORD: ${DB_PASSWORD:-postgres}
+        USERS_DB_NAME: ${DB_NAME:-users_db}
+        # RMQ
+        RMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+        RMQ_EXCHANGE: app.events
+        RMQ_PREFETCH: 20
+        # Redis
+        REDIS_HOST: redis
+        REDIS_PORT: 6379
+        REDIS_DB: 0
+        REDIS_PASSWORD: ${REDIS_PASSWORD:-default_password}
+        # Notifications
+        WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3000/webhook}
+        PUSH_DELAY_HOURS: 24
+        # Common
+        NODE_ENV: production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [nebula-network]
 
+  app_notifications:
+    build:
+      context: .
+      dockerfile: services/notifications/Dockerfile
+    container_name: app_notifications
+    environment:
+        # DB (notifications)
+        NOTIFS_DB_HOST: postgres_notifications
+        NOTIFS_DB_PORT: 5432
+        NOTIFS_DB_USER: ${DB_USER:-postgres}
+        NOTIFS_DB_PASSWORD: ${DB_PASSWORD:-postgres}
+        NOTIFS_DB_NAME: notifications_db
+        # RMQ
+        RMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+        RMQ_EXCHANGE: app.events
+        RMQ_PREFETCH: 20
+        # Redis
+        REDIS_HOST: redis
+        REDIS_PORT: 6379
+        REDIS_DB: 0
+        REDIS_PASSWORD: ${REDIS_PASSWORD:-default_password}
+        # Notifications
+        WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3000/webhook}
+        PUSH_DELAY_HOURS: 24
+        # Common
+        NODE_ENV: production
+    depends_on:
+      postgres_notifications:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [nebula-network]
 
 volumes:
   pgdata:
