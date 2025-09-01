@@ -1,0 +1,34 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+enum NotificationStatus {
+  SCHEDULED
+  SENT
+  FAILED
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  correlationId String   @unique
+  traceId       String
+  
+  scheduledAt   DateTime
+  sentAt        DateTime?
+  status        NotificationStatus
+  failReason    String?
+  retryCount    Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([createdAt])
+}

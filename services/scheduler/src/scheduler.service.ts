@@ -57,7 +57,7 @@ export class SchedulerService implements OnModuleInit {
       JOBS.SEND_PUSH,
       {
         userId: data.userId,
-        username: data.name,
+        name: data.name,
         scheduledAt,
         traceId: data.traceId,
         correlationId: data.correlationId,

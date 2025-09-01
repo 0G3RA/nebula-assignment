@@ -17,6 +17,7 @@ export const pushWorkerProvider: FactoryProvider = {
     return new Worker<SendPushJob>(
       QUEUES.SEND_PUSH,
       async (job) => {
+        console.log('COMING JOB', job.data);
         await pushService.processPushNotification(job.data);
       },
       {

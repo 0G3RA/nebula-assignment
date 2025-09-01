@@ -1,10 +1,13 @@
 import {
   INestApplication,
+  INestApplicationContext,
   Injectable,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
 import { PrismaClient } from 'node_modules/.prisma/client';
+
+type ApplicationType = INestApplication | INestApplicationContext;
 
 @Injectable()
 export class DatabaseService
@@ -19,7 +22,7 @@ export class DatabaseService
     await this.$disconnect();
   }
 
-  static enableShutdownHooks(app: INestApplication, db: DatabaseService) {
+  static enableShutdownHooks(app: ApplicationType, db: DatabaseService) {
     const shutdown = () => {
       void (async () => {
         try {

@@ -6,7 +6,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "nest start --watch",
-    "build": "nest build"
+    "build": "nest build",
+    "prisma:generate": "prisma generate",
+    "prisma:dev": "prisma migrate dev"
   },
   "dependencies": {
     "@app/config": "workspace:*",
@@ -14,6 +16,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@prisma/client": "^6.15.0",
     "axios": "^1.11.0",
     "bullmq": "^5.58.4",
     "ioredis": "^5.7.0",
@@ -43,7 +46,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "prisma": "^6.15.0"
   },
   "jest": {
     "moduleFileExtensions": [
